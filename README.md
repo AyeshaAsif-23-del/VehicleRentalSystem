@@ -87,5 +87,33 @@ It ensures accuracy, reduces manual errors, and improves system efficiency using
 
 ---
 
+## Setup Instructions
 
+### Start XAMPP
+- Start Apache (Running on Port 8080).
+- Start MySQL (Running on Port 3307).
+
+---
+
+### Import Database
+- Open browser: http://localhost:8080/phpmyadmin/
+- Create database: VehicleRentalDB
+- Import the provided .sql file to generate the Vehicles, Customers, and Rentals tables.
+
+---
+
+### Open Project
+- Open project in **Visual Studio**
+- Navigate to DbConfig.cs and ensure the connection string matches your custom port:"server=localhost;port=3307;database=VehicleRentalDB;uid=root;pwd=;"
+
+---
+
+### Configure Database
+- In `DbConfig.cs`:
+
+---
+
+### Run Project
+- Press F5
+- Console menu will appear
 
