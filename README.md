@@ -108,11 +108,6 @@ It ensures accuracy, reduces manual errors, and improves system efficiency using
 
 ---
 
-### Configure Database
-- In `DbConfig.cs`:
-
----
-
 ### Run Project
 - Press F5
 - Console menu will appear
