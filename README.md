@@ -1,6 +1,6 @@
 # Vehicle Rental Management System 
 
-A professional console-based **Management Information System (MIS)** developed in **C# and MySQL**. This system is designed for rental agencies to automate vehicle tracking, customer registration, and complex billing logic including late fees and damage assessments.
+A professional console-based **Management Information System (MIS)** developed in **C# and MySQL**. This system is designed for rental agencies to automate vehicle tracking, customer registration, and complex billing logic including late fees and damage assessments. It features **Smart Environment Detection**, allowing it to run seamlessly on local servers (XAMPP) or within **Docker containers**.
 
 ---
 
@@ -18,7 +18,7 @@ A professional console-based **Management Information System (MIS)** developed i
 ### 3. Rental and Return Logic
 * **Conflict Prevention:** Smart check to ensure a vehicle isn't double-booked.
 * **Automated Fine Calculation:**
-    * **Late Fees:** Automatically calculates charges if the vehicle is returned past the due date (Rate: **500 PKR/day**).
+    * **Late Fees:** Automatically calculates charges if the vehicle is returned past the due date.
     * **Damage Assessment:** Allows admins to manually input damage costs during the return process.
 * **Dynamic Billing:** Generates a final bill combining Base Rent + Late Fees + Damage Fines.
 
@@ -26,6 +26,10 @@ A professional console-based **Management Information System (MIS)** developed i
 * **Financial Summaries:** Separate tracking of **Base Revenue** and **Collected Fines** for clear auditing.
 * **Fleet Analytics:** Grouped reports showing the distribution of available and rented vehicles.
 * **Transaction History:** Logs the last 10 rental transactions with detailed cost breakdowns.
+
+### 5. Containerization and DevOps Ready
+* **Dockerized Environment:** Fully configured with `Dockerfile` and `docker-compose`.
+* **Smart DbConfig:** Automatically switches between `localhost:3307` (XAMPP) and `db:3306` (Docker) using environment variables.
 
 ---
 
@@ -41,30 +45,27 @@ The system ensures financial accuracy using the following logic:
 
 | Component | Technology |
 | :--- | :--- |
-| **Language** | C# (.NET Framework / Core) |
+| **Language** | C# (.NET 6.0 / Core) |
 | **Database** | MySQL (Relational) |
-| **Server** | XAMPP (Localhost) |
-| **Library** | MySql.Data.MySqlClient (Connector) |
+| **Containerization** | **Docker and Docker Compose** |
+| **Server (Local)** | XAMPP (Apache Port 8080 / MySQL Port 3307) |
 
 ---
 
 ## Setup and Installation
 
-### 1. XAMPP Configuration
-Ensure your XAMPP services are configured to match the project ports:
-* **Apache:** Running on Port `8080`.
-* **MySQL:** Running on Port **`3307`** (as configured in `DbConfig.cs`).
+### Option 1: Docker Setup 
+If you have Docker installed, you don't need to manually create a database:
+1. Open a terminal in the project root folder.
+2. Run the command: `docker-compose up --build`
+3. The system will automatically set up MySQL, create the `VehicleRental` database, and launch the application.
 
-### 2. Database Setup
-1.  Open **phpMyAdmin** (`http://localhost:8080/phpmyadmin`).
-2.  Create a new database named: `VehicleRental`.
-3.  Import the provided SQL script to generate the following schema:
-    * `Users`, `Vehicles`, `Customers`, and `Rentals`.
-
-### 3. Project Configuration
-1.  Open the solution in **Visual Studio**.
-2.  Verify the connection string in `DbConfig.cs` matches your port settings.
-3.  Press **F5** to build and run the application.
+### Option 2: Local XAMPP Setup 
+1. **XAMPP Configuration:** Ensure MySQL is running on port **3307** and Apache on **8080**.
+2. **Database Setup:** * Open phpMyAdmin (`http://localhost:8080/phpmyadmin`).
+    * Create a database named `VehicleRental`.
+    * Import the provided `db_init.sql` script to generate the schema.
+3. **Run Application:** Open the solution in **Visual Studio** and press **F5**.
 
 ---
 
@@ -81,4 +82,6 @@ The system is built to be robust against data errors:
 * `RentalManager.cs`: The core engine for Rent/Return and Fine logic.
 * `VehicleManager.cs` / `CustomerManager.cs`: CRUD operations for entities.
 * `ReportManager.cs`: Financial and operational data visualization.
-* `DbConfig.cs`: Centralized MySQL connection string.
+* `DbConfig.cs`: Intelligent MySQL connection management (Auto-detects environment).
+* `Dockerfile` and `docker-compose.yml`: Containerization configuration.
+
