@@ -1,36 +1,60 @@
-﻿using MySql.Data.MySqlClient;
-using System;
+﻿using System;
+using MySql.Data.MySqlClient;
 
 namespace VehicleRentalSystem
 {
     public class RentalManager
     {
+       
         private string GetInput(string msg)
         {
             Console.Write(msg);
-            return Console.ReadLine() ?? "";
+
+            string? input = Console.ReadLine();
+            return input ?? "";   
         }
 
         private bool GetInt(string msg, out int value)
         {
             Console.Write(msg);
-            return int.TryParse(Console.ReadLine(), out value);
+
+            string? input = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                value = 0;
+                return false;
+            }
+
+            return int.TryParse(input, out value);
         }
 
-        // 1. RENT VEHICL
+        private int SafeInt(object? value)
+        {
+            return (value == null || value == DBNull.Value) ? 0 : Convert.ToInt32(value);
+        }
+
+        private decimal SafeDecimal(object? value)
+        {
+            return (value == null || value == DBNull.Value) ? 0 : Convert.ToDecimal(value);
+        }
+
+        private string SafeString(object? value)
+        {
+            return (value == null || value == DBNull.Value) ? "" : value.ToString() ?? "";
+        }
+
+        
+        // 1. RENT VEHICLE
+      
         public void RentVehicle()
         {
             Console.Clear();
             Console.WriteLine("--- Process New Rental ---");
 
-            if (!GetInt("Enter Customer ID: ", out int cId))
-                return;
-
-            if (!GetInt("Enter Vehicle ID: ", out int vId))
-                return;
-
-            if (!GetInt("Enter Rental Days: ", out int days))
-                return;
+            if (!GetInt("Enter Customer ID: ", out int cId)) return;
+            if (!GetInt("Enter Vehicle ID: ", out int vId)) return;
+            if (!GetInt("Enter Rental Days: ", out int days)) return;
 
             using (var conn = DbConfig.GetConnection())
             {
@@ -38,44 +62,44 @@ namespace VehicleRentalSystem
                 {
                     conn.Open();
 
-                    // Check Customer exists
+                    // Check customer
                     MySqlCommand custCheck = new MySqlCommand(
                         "SELECT COUNT(*) FROM Customers WHERE CustomerID=@cid", conn);
+
                     custCheck.Parameters.AddWithValue("@cid", cId);
 
-                    int custExists = Convert.ToInt32(custCheck.ExecuteScalar());
+                    int custExists = SafeInt(custCheck.ExecuteScalar());
 
                     if (custExists == 0)
                     {
-                        Console.WriteLine("\n[!] Customer does not exist.");
+                        Console.WriteLine("\nCustomer not found.");
                         Console.ReadKey();
                         return;
                     }
 
-                    // Check Vehicle availability
-                    MySqlCommand checkCmd = new MySqlCommand(
+                    // Check vehicle
+                    MySqlCommand cmd = new MySqlCommand(
                         "SELECT Status, RentPerDay FROM Vehicles WHERE VehicleID=@vid", conn);
-                    checkCmd.Parameters.AddWithValue("@vid", vId);
 
-                    using (var reader = checkCmd.ExecuteReader())
+                    cmd.Parameters.AddWithValue("@vid", vId);
+
+                    using (var reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read())
                         {
-                            Console.WriteLine("\n[!] Vehicle not found.");
+                            Console.WriteLine("Vehicle not found.");
                             return;
                         }
 
-                        string status = reader["Status"]?.ToString() ?? "";
+                        string status = SafeString(reader["Status"]);
 
                         if (status != "Available")
                         {
-                            Console.WriteLine("\n[!] Vehicle already rented.");
+                            Console.WriteLine("Vehicle already rented.");
                             return;
                         }
 
-                        decimal rentPerDay =
-                            reader["RentPerDay"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["RentPerDay"]);
-
+                        decimal rentPerDay = SafeDecimal(reader["RentPerDay"]);
                         decimal total = rentPerDay * days;
 
                         reader.Close();
@@ -93,9 +117,10 @@ namespace VehicleRentalSystem
 
                         insert.ExecuteNonQuery();
 
-                        // Update vehicle
+                        // update vehicle
                         MySqlCommand update = new MySqlCommand(
                             "UPDATE Vehicles SET Status='Rented' WHERE VehicleID=@v", conn);
+
                         update.Parameters.AddWithValue("@v", vId);
                         update.ExecuteNonQuery();
 
@@ -112,7 +137,7 @@ namespace VehicleRentalSystem
             Console.ReadKey();
         }
 
-        // 2. RETURN VEHICLE 
+    
         public void ReturnVehicle()
         {
             Console.Clear();
@@ -126,41 +151,86 @@ namespace VehicleRentalSystem
                 conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand(
-                    "SELECT VehicleID FROM Rentals WHERE RentalID=@id AND Status='Active'", conn);
+                    @"SELECT VehicleID, RentDate, TotalDays, TotalAmount 
+                      FROM Rentals 
+                      WHERE RentalID=@id AND Status='Active'", conn);
+
                 cmd.Parameters.AddWithValue("@id", rId);
 
-                object result = cmd.ExecuteScalar();
-
-                if (result == null || result == DBNull.Value)
+                using (var reader = cmd.ExecuteReader())
                 {
-                    Console.WriteLine("Rental not found.");
-                    Console.ReadKey();
-                    return;
+                    if (!reader.Read())
+                    {
+                        Console.WriteLine("Rental not found or already completed.");
+                        Console.ReadKey();
+                        return;
+                    }
+
+                    int vId = SafeInt(reader["VehicleID"]);
+                    DateTime rentDate = Convert.ToDateTime(reader["RentDate"]);
+                    int allowedDays = SafeInt(reader["TotalDays"]);
+                    decimal baseAmount = SafeDecimal(reader["TotalAmount"]);
+
+                    reader.Close();
+
+           
+
+                    DateTime returnDate = DateTime.Now;
+                    int actualDays = (returnDate - rentDate).Days + 1;
+
+                    int lateDays = actualDays - allowedDays;
+                    if (lateDays < 0) lateDays = 0;
+
+                    decimal lateFine = lateDays * 500;
+
+                    // Damage input safe
+                    Console.Write("Damage fine (0 if none): ");
+                    string? damageInput = Console.ReadLine();
+                    decimal damageFine = decimal.TryParse(damageInput, out decimal d) ? d : 0;
+
+                    decimal totalFine = lateFine + damageFine;
+                    decimal finalAmount = baseAmount + totalFine;
+
+                    // UPDATE RENTAL
+
+                    MySqlCommand updateRental = new MySqlCommand(
+                        @"UPDATE Rentals 
+                          SET Status='Completed',
+                              ReturnDate=CURDATE(),
+                              Fine=@fine,
+                              TotalAmount=@total
+                          WHERE RentalID=@id", conn);
+
+                    updateRental.Parameters.AddWithValue("@fine", totalFine);
+                    updateRental.Parameters.AddWithValue("@total", finalAmount);
+                    updateRental.Parameters.AddWithValue("@id", rId);
+                    updateRental.ExecuteNonQuery();
+
+                    // update vehicle
+                    MySqlCommand updateVehicle = new MySqlCommand(
+                        "UPDATE Vehicles SET Status='Available' WHERE VehicleID=@v", conn);
+
+                    updateVehicle.Parameters.AddWithValue("@v", vId);
+                    updateVehicle.ExecuteNonQuery();
+
+                    // BILL
+                    Console.WriteLine("\n--- FINAL BILL ---");
+                    Console.WriteLine($"Base Amount : {baseAmount:0.00}");
+                    Console.WriteLine($"Late Days   : {lateDays}");
+                    Console.WriteLine($"Late Fine   : {lateFine:0.00}");
+                    Console.WriteLine($"Damage Fine : {damageFine:0.00}");
+                    Console.WriteLine($"Total Fine  : {totalFine:0.00}");
+                    Console.WriteLine($"TOTAL PAY   : {finalAmount:0.00}");
+
+                    Console.WriteLine("\nVehicle returned successfully!");
                 }
-
-                int vId = Convert.ToInt32(result);
-
-                
-                Console.Write("Any damages or late fee? (0 if none): ");
-                decimal fine = decimal.TryParse(Console.ReadLine(), out decimal f) ? f : 0;
-
-                MySqlCommand updateRental = new MySqlCommand(
-                    "UPDATE Rentals SET Status='Completed', ReturnDate=CURDATE(), Fine=@f WHERE RentalID=@id", conn);
-                updateRental.Parameters.AddWithValue("@id", rId);
-                updateRental.Parameters.AddWithValue("@f", fine);
-                updateRental.ExecuteNonQuery();
-
-                MySqlCommand updateVehicle = new MySqlCommand(
-                    "UPDATE Vehicles SET Status='Available' WHERE VehicleID=@v", conn);
-                updateVehicle.Parameters.AddWithValue("@v", vId);
-                updateVehicle.ExecuteNonQuery();
-
-                Console.WriteLine("\nVehicle returned successfully!");
             }
 
             Console.ReadKey();
         }
 
+        // 3. VIEW RENTALS
+       
         public void ViewRentals()
         {
             Console.Clear();
@@ -170,14 +240,19 @@ namespace VehicleRentalSystem
             {
                 conn.Open();
 
-                MySqlCommand cmd = new MySqlCommand(
-                    "SELECT * FROM Rentals", conn);
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Rentals", conn);
 
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        Console.WriteLine($"{reader["RentalID"]} | {reader["CustomerID"]} | {reader["VehicleID"]} | {reader["Status"]}");
+                        Console.WriteLine(
+                            $"{SafeInt(reader["RentalID"])} | " +
+                            $"{SafeInt(reader["CustomerID"])} | " +
+                            $"{SafeInt(reader["VehicleID"])} | " +
+                            $"{SafeString(reader["Status"])} | " +
+                            $"{SafeDecimal(reader["TotalAmount"]):0.00}"
+                        );
                     }
                 }
             }

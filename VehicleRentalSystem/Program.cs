@@ -4,7 +4,7 @@ namespace VehicleRentalSystem
 {
     class Program
     {
-        // SAFE INPUT METHOD (fixes all null warnings)
+        
         static string GetInput(string message)
         {
             Console.Write(message);

@@ -5,7 +5,6 @@ namespace VehicleRentalSystem
 {
     public class ReportManager
     {
-       
         private string GetInput(string message)
         {
             Console.Write(message);
@@ -18,7 +17,7 @@ namespace VehicleRentalSystem
             Console.WriteLine("--- Business Intelligence & Reports ---");
             Console.WriteLine("1. Total Earnings Summary");
             Console.WriteLine("2. Fleet Status Report (Available vs Rented)");
-            Console.WriteLine("3. Recent Rental History");
+            Console.WriteLine("3. Recent Rental History (Detailed)");
 
             string choice = GetInput("\nSelect Report Type: ");
 
@@ -40,7 +39,7 @@ namespace VehicleRentalSystem
             }
         }
 
-        // 1. TOTAL EARNINGS
+        // 1. TOTAL EARNINGS (Updated to include Fines)
         public void TotalEarnings()
         {
             Console.Clear();
@@ -49,21 +48,30 @@ namespace VehicleRentalSystem
             {
                 conn.Open();
 
-                string query = "SELECT SUM(TotalAmount) FROM Rentals WHERE Status='Completed'";
+                // Revenue calculation including Fines
+                string query = "SELECT SUM(TotalAmount) AS Revenue, SUM(Fine) AS Fines FROM Rentals WHERE Status='Completed'";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
 
-                object result = cmd.ExecuteScalar();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    decimal totalRevenue = 0;
+                    decimal totalFines = 0;
 
-                // ✔ Safe conversion (handles NULL from DB)
-                decimal total = (result != DBNull.Value && result != null)
-                                ? Convert.ToDecimal(result)
-                                : 0;
+                    if (reader.Read())
+                    {
+                        totalRevenue = reader["Revenue"] != DBNull.Value ? Convert.ToDecimal(reader["Revenue"]) : 0;
+                        totalFines = reader["Fines"] != DBNull.Value ? Convert.ToDecimal(reader["Fines"]) : 0;
+                    }
 
-                Console.WriteLine("\n==================================");
-                Console.WriteLine("        FINANCIAL SUMMARY        ");
-                Console.WriteLine("==================================");
-                Console.WriteLine($"TOTAL REVENUE: {total:0.00} PKR");
-                Console.WriteLine("==================================\n");
+                    Console.WriteLine("\n==================================");
+                    Console.WriteLine("        FINANCIAL SUMMARY        ");
+                    Console.WriteLine("==================================");
+                    Console.WriteLine($"Base Rent Revenue : {(totalRevenue - totalFines):0.00} PKR");
+                    Console.WriteLine($"Total Fines (Late/Damage): {totalFines:0.00} PKR");
+                    Console.WriteLine("----------------------------------");
+                    Console.WriteLine($"TOTAL COLLECTION  : {totalRevenue:0.00} PKR");
+                    Console.WriteLine("==================================\n");
+                }
             }
 
             Console.WriteLine("Press any key to return...");
@@ -74,30 +82,26 @@ namespace VehicleRentalSystem
         private void FleetStatus()
         {
             Console.Clear();
-
             using (var conn = DbConfig.GetConnection())
             {
                 conn.Open();
-
                 string query = "SELECT Status, COUNT(*) AS Count FROM Vehicles GROUP BY Status";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
 
                 using (var reader = cmd.ExecuteReader())
                 {
                     Console.WriteLine("\n--- Fleet Availability ---\n");
-
                     while (reader.Read())
                     {
                         Console.WriteLine($"{reader["Status"]}: {reader["Count"]} vehicle(s)");
                     }
                 }
             }
-
             Console.WriteLine("\nPress any key to return...");
             Console.ReadKey();
         }
 
-        // 3. RENTAL HISTORY
+        // 3. RENTAL HISTORY (Updated with Fine Column)
         private void RentalHistory()
         {
             Console.Clear();
@@ -106,7 +110,8 @@ namespace VehicleRentalSystem
             {
                 conn.Open();
 
-                string query = @"SELECT r.RentalID, c.Name AS Customer, v.Name AS Vehicle, r.TotalAmount, r.Status 
+                // Join query to show all details including fine
+                string query = @"SELECT r.RentalID, c.Name AS Customer, v.Name AS Vehicle, r.Fine, r.TotalAmount, r.Status 
                                  FROM Rentals r
                                  JOIN Customers c ON r.CustomerID = c.CustomerID
                                  JOIN Vehicles v ON r.VehicleID = v.VehicleID
@@ -118,17 +123,18 @@ namespace VehicleRentalSystem
                 {
                     Console.WriteLine("\n--- Last 10 Transactions ---\n");
 
-                    Console.WriteLine("----------------------------------------------------------");
-                    Console.WriteLine(string.Format("{0,-5} | {1,-15} | {2,-15} | {3,-10}",
-                        "ID", "Customer", "Vehicle", "Amount"));
-                    Console.WriteLine("----------------------------------------------------------");
+                    Console.WriteLine("--------------------------------------------------------------------------");
+                    Console.WriteLine(string.Format("{0,-5} | {1,-12} | {2,-12} | {3,-10} | {4,-10}",
+                        "ID", "Customer", "Vehicle", "Fine", "Total"));
+                    Console.WriteLine("--------------------------------------------------------------------------");
 
                     while (reader.Read())
                     {
-                        Console.WriteLine(string.Format("{0,-5} | {1,-15} | {2,-15} | {3,-10}",
+                        Console.WriteLine(string.Format("{0,-5} | {1,-12} | {2,-12} | {3,-10} | {4,-10}",
                             reader["RentalID"],
                             reader["Customer"],
                             reader["Vehicle"],
+                            reader["Fine"],
                             reader["TotalAmount"]));
                     }
                 }

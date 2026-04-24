@@ -1,0 +1,42 @@
+CREATE DATABASE IF NOT EXISTS VehicleRental;
+USE VehicleRental;
+
+CREATE TABLE IF NOT EXISTS Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(50) NOT NULL,
+    Password VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Vehicles (
+    VehicleID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Type VARCHAR(50),
+    Model VARCHAR(50),
+    PlateNumber VARCHAR(20) UNIQUE,
+    Status VARCHAR(20) DEFAULT 'Available',
+    RentPerDay DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    CNIC VARCHAR(20) UNIQUE NOT NULL,
+    Phone VARCHAR(15),
+    LicenseNumber VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS Rentals (
+    RentalID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT,
+    VehicleID INT,
+    RentDate DATE NOT NULL,
+    ReturnDate DATE,
+    TotalDays INT DEFAULT 0,
+    Fine DECIMAL(10,2) DEFAULT 0.00,
+    TotalAmount DECIMAL(10,2) DEFAULT 0.00,
+    Status VARCHAR(20) DEFAULT 'Active',
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (VehicleID) REFERENCES Vehicles(VehicleID)
+);
+
+INSERT IGNORE INTO Users (Username, Password) VALUES ('admin', 'admin123');
