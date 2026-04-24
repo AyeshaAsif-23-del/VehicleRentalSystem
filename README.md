@@ -76,7 +76,7 @@ The system is built to be robust against data errors:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 * `Program.cs`: Main navigation and menu logic.
 * `RentalManager.cs`: The core engine for Rent/Return and Fine logic.
 * `VehicleManager.cs` / `CustomerManager.cs`: CRUD operations for entities.
