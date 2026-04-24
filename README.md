@@ -1,114 +1,84 @@
 # Vehicle Rental Management System 
 
-A console-based **Management Information System (MIS)** developed in **C# and MySQL** to manage vehicle rental operations efficiently.  
-This system helps rental agencies handle vehicles, customers, rentals, returns, and billing in a structured and automated way.
+A professional console-based **Management Information System (MIS)** developed in **C# and MySQL**. This system is designed for rental agencies to automate vehicle tracking, customer registration, and complex billing logic including late fees and damage assessments.
 
 ---
 
-## Project Overview
+## Key Features
 
-The Vehicle Rental Management System is designed to simplify rental business operations by automating:
+### 1. Secure Admin Authentication
+* **Multi-Attempt Security:** Restricted access with a **3-attempt login limit** to prevent unauthorized access.
+* **Database Verification:** Credentials are authenticated against the `Users` table for secure session management.
 
-- Vehicle management  
-- Rental processing  
-- Return handling  
-- Billing calculations  
-- Database record keeping  
+### 2. Fleet and Customer Management
+* **Full CRUD Operations:** Seamlessly Add, View, Update, and Delete vehicles and customers.
+* **Real-time Status Tracking:** Monitor vehicle availability (`Available` vs `Rented`) instantly.
+* **Data Integrity:** Prevents duplicate entries (Plate Numbers/CNICs) and ensures relational consistency.
 
-It ensures accuracy, reduces manual errors, and improves system efficiency using a relational database structure.
+### 3. Rental and Return Logic
+* **Conflict Prevention:** Smart check to ensure a vehicle isn't double-booked.
+* **Automated Fine Calculation:**
+    * **Late Fees:** Automatically calculates charges if the vehicle is returned past the due date (Rate: **500 PKR/day**).
+    * **Damage Assessment:** Allows admins to manually input damage costs during the return process.
+* **Dynamic Billing:** Generates a final bill combining Base Rent + Late Fees + Damage Fines.
 
----
-
-## Features
-
-### Vehicle Management
-- Add new vehicles to the system  
-- View all available and rented vehicles  
-- Update vehicle status (Available / Rented)  
-- Store vehicle details like model, type, and rent per day  
-
----
-
-### Customer Management
-- Register customers in the system (admin-controlled)  
-- Store customer details for rental tracking  
+### 4. Business Intelligence and Reports
+* **Financial Summaries:** Separate tracking of **Base Revenue** and **Collected Fines** for clear auditing.
+* **Fleet Analytics:** Grouped reports showing the distribution of available and rented vehicles.
+* **Transaction History:** Logs the last 10 rental transactions with detailed cost breakdowns.
 
 ---
 
-### Rental System
-- Rent a vehicle to a customer  
-- Prevent double booking of the same vehicle  
-- Store rental and return dates  
-- Maintain rental history  
+## Billing Formula
 
----
+The system ensures financial accuracy using the following logic:
 
-### Automatic Billing
-- Calculates total rent based on number of days  
-- Formula:
-  - `Total Rent = Daily Rate × Number of Days`
-- Ensures accurate and automatic billing  
-
----
-
-### Return System
-- Update vehicle status on return  
-- Close rental record after completion  
-- Make vehicle available for next customer  
-
----
-
-### Database Integration
-- MySQL database using XAMPP  
-- Stores:
-  - Vehicles  
-  - Customers  
-  - Rentals  
-- Ensures structured relational data  
-
----
-
-### Transaction Safety
-- Ensures data consistency using atomic operations  
-- Prevents partial updates in case of errors  
-- Maintains database integrity  
+> **Total Payable = (Base Rent per Day × Days Rented) + (Days Late × 500) + Manual Damage Fine**
 
 ---
 
 ## Tech Stack
 
-| Technology | Description |
-|------------|-------------|
-| C# | Programming Language |
-| .NET Framework / Core | Application Framework |
-| MySQL | Database |
-| XAMPP | Local Server |
-| MySql.Data | Database Connector |
+| Component | Technology |
+| :--- | :--- |
+| **Language** | C# (.NET Framework / Core) |
+| **Database** | MySQL (Relational) |
+| **Server** | XAMPP (Localhost) |
+| **Library** | MySql.Data.MySqlClient (Connector) |
 
 ---
 
-## Setup Instructions
+## Setup and Installation
 
-### Start XAMPP
-- Start Apache (Running on Port 8080).
-- Start MySQL (Running on Port 3307).
+### 1. XAMPP Configuration
+Ensure your XAMPP services are configured to match the project ports:
+* **Apache:** Running on Port `8080`.
+* **MySQL:** Running on Port **`3307`** (as configured in `DbConfig.cs`).
+
+### 2. Database Setup
+1.  Open **phpMyAdmin** (`http://localhost:8080/phpmyadmin`).
+2.  Create a new database named: `VehicleRental`.
+3.  Import the provided SQL script to generate the following schema:
+    * `Users`, `Vehicles`, `Customers`, and `Rentals`.
+
+### 3. Project Configuration
+1.  Open the solution in **Visual Studio**.
+2.  Verify the connection string in `DbConfig.cs` matches your port settings.
+3.  Press **F5** to build and run the application.
 
 ---
 
-### Import Database
-- Open browser: http://localhost:8080/phpmyadmin/
-- Create database: VehicleRentalDB
-- Import the provided .sql file to generate the Vehicles, Customers, and Rentals tables.
+## Transaction Safety and Null Handling
+The system is built to be robust against data errors:
+* **Safe Conversion:** Uses `SafeInt`, `SafeDecimal`, and `SafeString` methods to handle `NULL` values from the database.
+* **Crash Prevention:** If a field is empty in the database, the system defaults to `0` or an empty string instead of crashing.
+* **Input Validation:** Ensures that only valid IDs and amounts are processed during rentals.
 
 ---
 
-### Open Project
-- Open project in **Visual Studio**
-- Navigate to DbConfig.cs and ensure the connection string matches your custom port:"server=localhost;port=3307;database=VehicleRentalDB;uid=root;pwd=;"
-
----
-
-### Run Project
-- Press F5
-- Console menu will appear
-
+## 📂 Project Structure
+* `Program.cs`: Main navigation and menu logic.
+* `RentalManager.cs`: The core engine for Rent/Return and Fine logic.
+* `VehicleManager.cs` / `CustomerManager.cs`: CRUD operations for entities.
+* `ReportManager.cs`: Financial and operational data visualization.
+* `DbConfig.cs`: Centralized MySQL connection string.
