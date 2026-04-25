@@ -1,4 +1,4 @@
-# Vehicle Rental Management System 
+# Vehicle Rental Management System 
 
 A professional console-based **Management Information System (MIS)** developed in **C# and MySQL**. This system is designed for rental agencies to automate vehicle tracking, customer registration, and complex billing logic including late fees and damage assessments. It features **Smart Environment Detection**, allowing it to run seamlessly on local servers (XAMPP) or within **Docker containers**.
 
@@ -18,8 +18,8 @@ A professional console-based **Management Information System (MIS)** developed i
 ### 3. Rental and Return Logic
 * **Conflict Prevention:** Smart check to ensure a vehicle isn't double-booked.
 * **Automated Fine Calculation:**
-    * **Late Fees:** Automatically calculates charges if the vehicle is returned past the due date.
-    * **Damage Assessment:** Allows admins to manually input damage costs during the return process.
+    * **Late Fees:** Automatically calculates charges if the vehicle is returned past the due date.
+    * **Damage Assessment:** Allows admins to manually input damage costs during the return process.
 * **Dynamic Billing:** Generates a final bill combining Base Rent + Late Fees + Damage Fines.
 
 ### 4. Business Intelligence and Reports
@@ -27,9 +27,9 @@ A professional console-based **Management Information System (MIS)** developed i
 * **Fleet Analytics:** Grouped reports showing the distribution of available and rented vehicles.
 * **Transaction History:** Logs the last 10 rental transactions with detailed cost breakdowns.
 
-### 5. Containerization and DevOps Ready
-* **Dockerized Environment:** Fully configured with `Dockerfile` and `docker-compose`.
-* **Smart DbConfig:** Automatically switches between `localhost:3307` (XAMPP) and `db:3306` (Docker) using environment variables.
+### 5. Containerization and DevOps 
+* **Dockerized: Fully configured with Dockerfile and docker-compose.
+* **Smart DbConfig: Auto-switches between localhost:3306 (XAMPP) and db:3306 (Docker) using environment variables.
 
 ---
 
@@ -48,24 +48,25 @@ The system ensures financial accuracy using the following logic:
 | **Language** | C# (.NET 6.0 / Core) |
 | **Database** | MySQL (Relational) |
 | **Containerization** | **Docker and Docker Compose** |
-| **Server (Local)** | XAMPP (Apache Port 8080 / MySQL Port 3307) |
+| **Server (Local)** | XAMPP (MySQL Port 3306) |
 
 ---
 
 ## Setup and Installation
 
-### Option 1: Docker Setup 
+### Option 1: Docker Setup 
 If you have Docker installed, you don't need to manually create a database:
 1. Open a terminal in the project root folder.
 2. Run the command: `docker-compose up --build`
 3. The system will automatically set up MySQL, create the `VehicleRental` database, and launch the application.
 
-### Option 2: Local XAMPP Setup 
-1. **XAMPP Configuration:** Ensure MySQL is running on port **3307** and Apache on **8080**.
-2. **Database Setup:** * Open phpMyAdmin (`http://localhost:8080/phpmyadmin`).
-    * Create a database named `VehicleRental`.
-    * Import the provided `db_init.sql` script to generate the schema.
-3. **Run Application:** Open the solution in **Visual Studio** and press **F5**.
+### Option 2: Local XAMPP Setup 
+1. **XAMPP Configuration:** Ensure MySQL is running on port **3306**.
+2. Run XAMPP Control Panel as Administrator to avoid permission issues.
+3. **Database Setup:** * Open phpMyAdmin (`http://localhost/phpmyadmin`).
+    * Create a database named `VehicleRental`.
+    * Import the provided `db_init.sql` script to generate the schema.
+4. **Run Application:** Open the solution in **Visual Studio** and press **F5**.
 
 ---
 
@@ -84,4 +85,4 @@ The system is built to be robust against data errors:
 * `ReportManager.cs`: Financial and operational data visualization.
 * `DbConfig.cs`: Intelligent MySQL connection management (Auto-detects environment).
 * `Dockerfile` and `docker-compose.yml`: Containerization configuration.
-
+now the changes required over here just update it and make it according the requiremnst of my project and give updated readme full
