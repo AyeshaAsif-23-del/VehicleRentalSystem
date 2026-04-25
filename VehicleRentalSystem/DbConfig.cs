@@ -11,13 +11,13 @@ namespace VehicleRentalSystem
 
             if (isDocker)
             {
-                // Docker uses port 3306 internally
+                // Docker setup
                 return "server=db;port=3306;database=VehicleRental;uid=root;pwd=;";
             }
             else
             {
-                //  XAMPP setup uses port 3307
-                return "server=localhost;port=3307;database=VehicleRental;uid=root;pwd=;";
+                // XAMPP ab 3306 par hai, is liye port update kar diya hai
+                return "server=localhost;port=3306;database=VehicleRental;uid=root;pwd=;";
             }
         }
 

@@ -8,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: ''
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     ports:
-      - "3307:3306"
+      - "3306:3306" 
     volumes:
       - ./db_init.sql:/docker-entrypoint-initdb.d/init.sql
 
