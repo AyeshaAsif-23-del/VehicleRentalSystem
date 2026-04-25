@@ -27,7 +27,7 @@ A professional console-based **Management Information System (MIS)** developed i
 * **Fleet Analytics:** Grouped reports showing the distribution of available and rented vehicles.
 * **Transaction History:** Logs the last 10 rental transactions with detailed cost breakdowns.
 
-### 5. Containerization and DevOps 
+### 5. Containerization and DevOps 
 * **Dockerized: Fully configured with Dockerfile and docker-compose.
 * **Smart DbConfig: Auto-switches between localhost:3306 (XAMPP) and db:3306 (Docker) using environment variables.
 
@@ -85,4 +85,3 @@ The system is built to be robust against data errors:
 * `ReportManager.cs`: Financial and operational data visualization.
 * `DbConfig.cs`: Intelligent MySQL connection management (Auto-detects environment).
 * `Dockerfile` and `docker-compose.yml`: Containerization configuration.
-now the changes required over here just update it and make it according the requiremnst of my project and give updated readme full
