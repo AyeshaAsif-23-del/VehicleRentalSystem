@@ -37,14 +37,14 @@ A professional, console-based management system built with C# and SQLite. This p
 
 ### Installation
 1. Clone the repository:
-   git clone https://github.com/yourusername/VehicleRentalSystem.git
-   cd VehicleRentalSystem
+   * git clone https://github.com/yourusername/VehicleRentalSystem.git
+   * cd VehicleRentalSystem
 
 2. Build the project:
-   dotnet build
+  * dotnet build
 
 3. Run the application:
-   dotnet run
+   * dotnet run
 
 ### Default Login
 * Username: admin
@@ -66,18 +66,13 @@ Note: Database is stored persistently using a Docker volume (rental_data).
 
 ## Project Structure
 
-VehicleRentalSystem
-│
-├── Program.cs              # Main application flow and dashboards
-├── Database.cs            # SQLite connection and initialization
-├── UI.cs                  # Console UI formatting and styling
-│
-├── Services/
-│   ├── AuthService.cs     # Authentication and registration logic
-│   ├── VehicleService.cs  # Vehicle CRUD operations
-│   └── RentalService.cs   # Rental, billing, and settlement logic
-│
-└── Models/                # User, Vehicle, and Rental data structures
+| File | Description |
+| :--- | :--- |
+| `Program.cs` | Main entry point and core navigation logic. |
+| `Database.cs` | Handles SQLite connections and schema initialization. |
+| `UI.cs` | Centralized formatting for tables, headers, and color-coded feedback. |
+| `Services/` | Contains `AuthService`, `RentalService`, and `VehicleService` for business logic. |
+| `Models/` | Data structures for `User`, `Vehicle`, and `Rental` objects. |
 
 ---
 
