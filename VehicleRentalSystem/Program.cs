@@ -33,6 +33,7 @@ namespace VehicleRentalSystem
                 }
                 else if (c == "2") auth.Register();
                 else if (c == "3") break;
+                else UI.Error("Invalid option!");
             }
         }
 
@@ -65,13 +66,11 @@ namespace VehicleRentalSystem
                 else if (c == "4") v.Delete();
                 else if (c == "5") r.ProcessReturn(id, true);
                 else if (c == "6") SetSystemCharges();
-
-                // 🔥 NEW REPORTING FEATURES
                 else if (c == "7") ViewTotalRevenue();
                 else if (c == "8") ViewMonthlyRevenue();
                 else if (c == "9") TopEarningVehicle();
-
                 else if (c == "10") break;
+                else UI.Error("Invalid option!");
             }
         }
 
@@ -98,6 +97,7 @@ namespace VehicleRentalSystem
                 else if (c == "3") r.ProcessReturn(id, false);
                 else if (c == "4") r.ViewUserHistory(id);
                 else if (c == "5") break;
+                else UI.Error("Invalid option!");
             }
         }
 
@@ -110,13 +110,25 @@ namespace VehicleRentalSystem
             conn.Open();
 
             Console.Write(" Late Fee Per Day: ");
-            if (!double.TryParse(Console.ReadLine(), out double late)) return;
+            if (!double.TryParse(Console.ReadLine(), out double late))
+            {
+                UI.Error("Invalid input!");
+                return;
+            }
 
             Console.Write(" Minor Damage Fee: ");
-            if (!double.TryParse(Console.ReadLine(), out double minor)) return;
+            if (!double.TryParse(Console.ReadLine(), out double minor))
+            {
+                UI.Error("Invalid input!");
+                return;
+            }
 
             Console.Write(" Major Damage Fee: ");
-            if (!double.TryParse(Console.ReadLine(), out double major)) return;
+            if (!double.TryParse(Console.ReadLine(), out double major))
+            {
+                UI.Error("Invalid input!");
+                return;
+            }
 
             var cmd = conn.CreateCommand();
 
@@ -152,7 +164,7 @@ namespace VehicleRentalSystem
             object result = cmd.ExecuteScalar();
             double total = result == DBNull.Value || result == null ? 0 : Convert.ToDouble(result);
 
-            Console.WriteLine($"\n Total Revenue: Rs {total}");
+            Console.WriteLine($"\n Total Revenue: Rs {total:F2}");
             Console.ReadLine();
         }
 
@@ -168,12 +180,13 @@ namespace VehicleRentalSystem
                 SELECT SUM(Total)
                 FROM Rentals
                 WHERE Status='Completed'
+                AND ReturnDate IS NOT NULL
                 AND strftime('%Y-%m', ReturnDate) = strftime('%Y-%m','now')";
 
             object result = cmd.ExecuteScalar();
             double total = result == DBNull.Value || result == null ? 0 : Convert.ToDouble(result);
 
-            Console.WriteLine($"\n This Month Revenue: Rs {total}");
+            Console.WriteLine($"\n This Month Revenue: Rs {total:F2}");
             Console.ReadLine();
         }
 
@@ -194,12 +207,12 @@ namespace VehicleRentalSystem
                 ORDER BY Revenue DESC
                 LIMIT 1";
 
-            using var r = cmd.ExecuteReader();
+            using var reader = cmd.ExecuteReader();
 
-            if (r.Read())
+            if (reader.Read())
             {
-                Console.WriteLine($"\n Vehicle: {r.GetString(0)}");
-                Console.WriteLine($" Earnings: Rs {r.GetDouble(1)}");
+                Console.WriteLine($"\n Vehicle: {reader.GetString(0)}");
+                Console.WriteLine($" Earnings: Rs {reader.GetDouble(1):F2}");
             }
             else
             {
