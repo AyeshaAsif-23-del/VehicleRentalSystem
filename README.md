@@ -55,10 +55,10 @@ A professional, console-based management system built with C# and SQLite. This p
 ## Docker Deployment
 
 ### 1. Build the Image
-docker build -t vehicle-rental-app .
+docker build -t rental-system .
 
 ### 2. Run the Container
-docker run -it --name rental-container -v rental_data:/app/data vehicle-rental-app
+docker run -it --name my-rental-app rental-system
 
 Note: Database is stored persistently using a Docker volume (rental_data).
 
