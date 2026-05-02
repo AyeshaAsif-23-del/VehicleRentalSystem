@@ -37,14 +37,14 @@ A professional, console-based management system built with C# and SQLite. This p
 
 ### Installation
 1. Clone the repository:
-* git clone https://github.com/yourusername/VehicleRentalSystem.git
-* cd VehicleRentalSystem
+ * git clone https://github.com/yourusername/VehicleRentalSystem.git
+ * cd VehicleRentalSystem
 
 2. Build the project:
-* dotnet build
+ * dotnet build
 
 3. Run the application:
-* dotnet run
+ * dotnet run
 
 ### Default Login
 * Username: admin
